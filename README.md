@@ -8,7 +8,6 @@
 > [!WARNING]
 > - This integration is under development!
 > - Test coverage is low, malfunction might occur. 
-> - The HOME_KEY is lost over updates!
 
 ## Features
 - Zero configuration
@@ -22,14 +21,20 @@ Type* | Description
 4  | Roman
 5  | Bottom Up
 6  | Duette
+8  | Duette, Top Down Bottom Up
+9  | Duette DuoLite, Top Down Bottom Up
 10 | Duette and Applause SkyLift
 19 | Provenance Woven Wood
 31, 32, 84 | Vignette
+33 | Duette Architella, Top Down Bottom Up
 39 | Parkland
 42 | M25T Roller Blind
+47 | Pleated, Top Down Bottom Up
 49 | AC Roller
+51, 62 | Venetian, Tilt Anywhere
 52 | Banded Shades
 53 | Sonnette
+103 | Duo Roller
 
 \*) Type can be found in the PowerView app under *product info*, *type ID*
 
@@ -45,7 +50,7 @@ Platform | Description | Unit | Details
 
 ## Installation
 > [!IMPORTANT]
-> In case you added your shades to the app or a gateway, you need to [set the encryption key](#set-the-encryption-key) manually in the [`const.py`](https://github.com/patman15/hdpv_ble/blob/main/custom_components/hunterdouglas_powerview_ble/const.py) file after **each** update!
+> In case you added your shades to the app or a gateway, you need to [set the encryption key](#set-the-encryption-key) via the integration's configuration flow in Home Assistant.
 
 ### Automatic
 Installation can be done using [HACS](https://hacs.xyz/) by [adding a custom repository](https://hacs.xyz/docs/faq/custom_repositories/).
@@ -68,10 +73,10 @@ Currently, there are three methods to obtain the key:
 2. Extracting from gateway: This [script](scripts/extract_gateway3_homekey.py) is able to extract the key from a working PowerView gateway.
 3. Grabbing from the app: Checkout this [post in the Home Assistant community forum](https://community.home-assistant.io/t/hunter-douglas-powerview-gen-3-integration/424836/228).
 
-Finally, you need to manually copy the key to [`const.py`](https://github.com/patman15/hdpv_ble/blob/main/custom_components/hunterdouglas_powerview_ble/const.py).
+Once you have the key, enter it via the integration's configuration flow in Home Assistant:
+**Settings → Devices & Services → Hunter Douglas PowerView (BLE) → Configure**
 
-> [!IMPORTANT]
-> You need to update the file after **each** update!
+The key is stored in the HA config entry and persists across integration updates.
 
 ## Known Issues
 <details><summary>Shade inoperable after charging</summary>
@@ -96,5 +101,5 @@ In case you have severe troubles,
 ## Outlook
 - Add tests!
 - Allow parallel usage to PowerView app as "remote"
-- Add support for tilt function
+- ~~Add support for tilt function~~ ✅ Vanes/tilt control for Duette, Duo Roller, and Venetian shades
 - Add support for further device types
