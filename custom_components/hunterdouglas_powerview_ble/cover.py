@@ -38,8 +38,8 @@ async def async_setup_entry(
     entities: list[PowerViewCover] = []
     if model in ["39"]:
         entities.append(PowerViewCoverTiltOnly(coordinator))
-    elif model in ["6", "8", "9", "10", "33"]:
-        # Duette / Applause shades: secondary position controls vanes (privacy mode)
+    elif model in ["6", "8", "9", "10", "33", "103"]:
+        # Duette / Applause / Duo Roller shades: secondary position controls vanes (privacy mode)
         entities.append(PowerViewCoverDuette(coordinator))
     elif model in ["51", "62"]:
         entities.append(PowerViewCoverTilt(coordinator))
