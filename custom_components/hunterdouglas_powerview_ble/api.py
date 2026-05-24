@@ -135,6 +135,11 @@ class PowerViewBLE:
         self._is_encrypted = value
 
     @property
+    def has_home_key(self) -> bool:
+        """Return whether a valid home key is configured."""
+        return self._cipher is not None
+
+    @property
     def info(self) -> PVDeviceInfo:
         """Return device information, e.g. SW version."""
         return self._info

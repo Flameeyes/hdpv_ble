@@ -3,13 +3,46 @@
     "flow_title": "Setup {name}",
     "step": {
       "bluetooth_confirm": {
-        "description": "[%key:component::bluetooth::config::step::bluetooth_confirm::description%]"
+        "description": "Set up {name}",
+        "data": {
+          "home_key": "Home Key (32 hex characters)"
+        },
+        "data_description": {
+          "home_key": "The 16-byte AES encryption key shared by all shades in your home, entered as 32 hex characters. Extract it using the ESP32 emulator sketch. Leave blank for unencrypted shades."
+        }
+      },
+      "user": {
+        "data": {
+          "address": "Device",
+          "home_key": "Home Key (32 hex characters)"
+        },
+        "data_description": {
+          "home_key": "The 16-byte AES encryption key shared by all shades in your home, entered as 32 hex characters. Extract it using the ESP32 emulator sketch. Leave blank for unencrypted shades."
+        }
       }
+    },
+    "error": {
+      "invalid_home_key": "Invalid home key. Must be exactly 32 hex characters (16 bytes)."
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
       "no_devices_found": "[%key:common::config_flow::abort::no_devices_found%]",
       "not_supported": "Device not supported"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "home_key": "Home Key (32 hex characters)"
+        },
+        "data_description": {
+          "home_key": "The 16-byte AES encryption key shared by all shades in your home, entered as 32 hex characters. The integration will reload automatically after saving."
+        }
+      }
+    },
+    "error": {
+      "invalid_home_key": "Invalid home key. Must be exactly 32 hex characters (16 bytes)."
     }
   }
 }

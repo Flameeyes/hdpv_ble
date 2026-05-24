@@ -13,7 +13,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryError, ConfigEntryNotReady
 
-from .const import LOGGER
+from .const import CONF_HOME_KEY, LOGGER
 from .coordinator import PVCoordinator
 
 PLATFORMS: list[Platform] = [
@@ -67,11 +67,25 @@ async def async_migrate_entry(
 ) -> bool:
     """Migrate old entry."""
 
-    if config_entry.version > 1:
+    if config_entry.version > 2:
         # This means the user has downgraded from a future version
         LOGGER.debug("Cannot downgrade from version %s", config_entry.version)
         return False
 
-    LOGGER.debug("Migrating from version %s", config_entry.version)
+    if config_entry.version == 1:
+        LOGGER.debug("Migrating from version 1 to 2")
+        # V1 -> V2: add empty home_key to existing entries.
+        # Users will need to set the key via the options flow.
+        new_data = {**config_entry.data}
+        if CONF_HOME_KEY not in new_data:
+            new_data[CONF_HOME_KEY] = ""
+        _hass.config_entries.async_update_entry(
+            config_entry, data=new_data, version=2, minor_version=0
+        )
+        LOGGER.info(
+            "Migrated config entry %s to v2. Set your home_key in "
+            "Settings > Devices > PowerView > Configure.",
+            config_entry.unique_id,
+        )
 
-    return False
+    return True
