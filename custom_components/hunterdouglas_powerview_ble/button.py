@@ -10,11 +10,12 @@ from homeassistant.components.button import (
     ButtonEntity,
     ButtonEntityDescription,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo, format_mac
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from . import ConfigEntryType
 
 from .const import DOMAIN, LOGGER
 from .coordinator import PVCoordinator
@@ -30,7 +31,7 @@ BUTTONS_SHADE: Final = [
 
 async def async_setup_entry(
     _hass: HomeAssistant,
-    config_entry: ConfigEntry,
+    config_entry: ConfigEntryType,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the demo cover platform."""
