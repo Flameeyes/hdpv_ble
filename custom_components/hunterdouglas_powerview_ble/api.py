@@ -187,7 +187,7 @@ class PowerViewBLE:
                 raise
 
     @staticmethod
-    def dec_manufacturer_data(data: bytearray) -> list[tuple[str, float]]:
+    def dec_manufacturer_data(data: bytearray) -> list[tuple[str, int | float | bool]]:
         """Decode manufacturer data from BLE advertisement V2."""
         if len(data) != 9:
             LOGGER.debug("not a V2 record!")
