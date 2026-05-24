@@ -38,6 +38,11 @@ async def async_setup_entry(
     entities: list[PowerViewCover] = []
     if model in ["39"]:
         entities.append(PowerViewCoverTiltOnly(coordinator))
+    elif model in ["6", "8", "9", "10", "33"]:
+        # Duette / Applause shades: secondary position controls vanes (privacy mode)
+        entities.append(PowerViewCoverDuette(coordinator))
+    elif model in ["51", "62"]:
+        entities.append(PowerViewCoverTilt(coordinator))
     else:
         entities.append(PowerViewCover(coordinator))
 
@@ -181,6 +186,84 @@ class PowerViewCover(PassiveBluetoothCoordinatorEntity[PVCoordinator], CoverEnti
             self.async_write_ha_state()
         except BleakError as err:
             LOGGER.error("Failed to stop cover '%s': %s", self.name, err)
+
+
+class PowerViewCoverDuette(PowerViewCover):
+    """Representation of a Duette/Applause shade with vanes (privacy) control.
+
+    The vanes position is mapped to HA tilt, giving a second slider in the
+    cover UI. Under the hood it controls the PowerView pos2 parameter.
+    """
+
+    _attr_supported_features = (
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.SET_POSITION
+        | CoverEntityFeature.STOP
+        | CoverEntityFeature.OPEN_TILT
+        | CoverEntityFeature.CLOSE_TILT
+        | CoverEntityFeature.STOP_TILT
+        | CoverEntityFeature.SET_TILT_POSITION
+    )
+
+    def __init__(self, coordinator: PVCoordinator) -> None:
+        """Initialize the Duette shade."""
+        LOGGER.debug("%s: init() PowerViewCoverDuette", coordinator.name)
+        super().__init__(coordinator)
+
+    @property
+    def current_cover_tilt_position(self) -> int | None:  # type: ignore[reportIncompatibleVariableOverride]
+        """Return current vanes position as tilt.
+
+        The 'position2' field from the advertisement is the vanes state.
+        It's stored as (raw >> 2); we rescale to 0-100 matching pos1's
+        advertisement encoding: (raw >> 2) / 10 = percentage.
+        """
+        pos2: Final = self._coord.data.get("position2")
+        if pos2 is None:
+            return None
+        # position2 is stored as pos2 >> 2 (0-1023 range).
+        # Same encoding as pos1: divide by 10 to get 0-100 percentage.
+        pct = round(pos2 / 10)
+        return max(0, min(100, pct))
+
+    async def async_set_cover_tilt_position(self, **kwargs: Any) -> None:
+        """Move the vanes to a specific position via pos2."""
+        if isinstance(target_position := kwargs.get(ATTR_TILT_POSITION), int):
+            LOGGER.debug("set Duette vanes to position %i", target_position)
+            cur_pos = self.current_cover_position
+            if cur_pos is None:
+                return
+            try:
+                await self._coord.api.set_position(
+                    cur_pos, pos2=target_position * 100
+                )
+                self.async_write_ha_state()
+            except BleakError as err:
+                LOGGER.error(
+                    "Failed to set vanes on '%s' to %i%%: %s",
+                    self.name,
+                    target_position,
+                    err,
+                )
+
+    async def async_stop_cover_tilt(self, **kwargs: Any) -> None:
+        """Stop the shade (shared with cover stop)."""
+        await self.async_stop_cover(kwargs=kwargs)
+
+    async def async_open_cover_tilt(self, **kwargs: Any) -> None:
+        """Fully open vanes."""
+        LOGGER.debug("open Duette vanes")
+        await self.async_set_cover_tilt_position(
+            **{**kwargs, ATTR_TILT_POSITION: OPEN_POSITION}
+        )
+
+    async def async_close_cover_tilt(self, **kwargs: Any) -> None:
+        """Fully close vanes."""
+        LOGGER.debug("close Duette vanes")
+        await self.async_set_cover_tilt_position(
+            **{**kwargs, ATTR_TILT_POSITION: CLOSED_POSITION}
+        )
 
 
 class PowerViewCoverTilt(PowerViewCover):
