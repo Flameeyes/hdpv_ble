@@ -66,7 +66,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> OptionsFlow:
         """Return the options flow handler."""
-        return PVOptionsFlow(config_entry)
+        return PVOptionsFlow()
 
     async def async_step_bluetooth(
         self, discovery_info: BluetoothServiceInfoBleak
@@ -203,10 +203,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 class PVOptionsFlow(OptionsFlow):
     """Handle options flow for Hunter Douglas PowerView (BLE)."""
 
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self._config_entry = config_entry
-
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -223,17 +219,17 @@ class PVOptionsFlow(OptionsFlow):
 
             if not errors:
                 # Update the config entry data with the new key
-                new_data = {**self._config_entry.data, CONF_HOME_KEY: home_key_hex}
+                new_data = {**self.config_entry.data, CONF_HOME_KEY: home_key_hex}
                 self.hass.config_entries.async_update_entry(
-                    self._config_entry, data=new_data
+                    self.config_entry, data=new_data
                 )
                 # Reload the integration to pick up the new key
                 await self.hass.config_entries.async_reload(
-                    self._config_entry.entry_id
+                    self.config_entry.entry_id
                 )
                 return self.async_create_entry(title="", data={})
 
-        current_key = self._config_entry.data.get(CONF_HOME_KEY, "")
+        current_key = self.config_entry.data.get(CONF_HOME_KEY, "")
 
         return self.async_show_form(
             step_id="init",
